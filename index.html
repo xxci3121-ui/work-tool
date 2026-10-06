@@ -281,7 +281,7 @@
 <div class="container">
   <header>
     <h1>社群營運工作記錄產生器</h1>
-    <p>支援多篇發文/挑選新增與自訂工作欄位，點擊「產生並複製」即可直接貼上進度表！</p>
+    <p>支援多篇開文發布、開文引用、帳號挑選與自訂欄位，點擊「產生並複製」即可直接貼上進度表！</p>
   </header>
 
   <div class="card">
@@ -318,7 +318,6 @@
         <div class="item-title-wrap"><span class="item-title">開文發布</span></div>
         <div class="dynamic-col">
           <div id="publish-container" class="dynamic-col">
-            <!-- 預設第一列 -->
             <div class="entry-row">
               <select class="publish-brand">
                 <option value="">-- 選擇廠牌 --</option>
@@ -332,7 +331,6 @@
                 <option value="澎湖伯">澎湖伯</option>
                 <option value="Play&Joy">Play&Joy</option>
                 <option value="橘時相遇">橘時相遇</option>
-                
               </select>
               <span class="hash-symbol">＃</span>
               <input type="text" class="publish-code" placeholder="篇數編號（如: 8-12）">
@@ -343,12 +341,39 @@
         </div>
       </div>
 
+      <!-- 開文引用 (支援動態新增) -->
+      <div class="item-row">
+        <div class="item-title-wrap"><span class="item-title">開文引用</span></div>
+        <div class="dynamic-col">
+          <div id="quote-container" class="dynamic-col">
+            <div class="entry-row">
+              <select class="quote-brand">
+                <option value="">-- 選擇廠牌 --</option>
+                <option value="倍得先生">倍得先生</option>
+                <option value="昇緻不動產">昇緻不動產</option>
+                <option value="瑞醫">瑞醫</option>
+                <option value="璞沃">璞沃</option>
+                <option value="力森">力森</option>
+                <option value="GEM">GEM</option>
+                <option value="康軒牙醫">康軒牙醫</option>
+                <option value="澎湖伯">澎湖伯</option>
+                <option value="Play&Joy">Play&Joy</option>
+                <option value="橘時相遇">橘時相遇</option>
+              </select>
+              <span class="hash-symbol">＃</span>
+              <input type="text" class="quote-code" placeholder="篇數編號（如: 8-5）">
+              <button type="button" class="btn-del" onclick="removeEntry(this)" title="刪除">✕</button>
+            </div>
+          </div>
+          <button type="button" class="btn-add" onclick="addQuoteRow()">＋ 新增一篇引用</button>
+        </div>
+      </div>
+
       <!-- 發文帳號挑選 (支援動態新增) -->
       <div class="item-row">
         <div class="item-title-wrap"><span class="item-title">發文帳號挑選</span></div>
         <div class="dynamic-col">
           <div id="select-acc-container" class="dynamic-col">
-            <!-- 預設第一列 -->
             <div class="entry-row">
               <select class="select-acc-brand">
                 <option value="">-- 選擇廠牌 --</option>
@@ -500,6 +525,19 @@
     container.appendChild(div);
   }
 
+  function addQuoteRow() {
+    const container = document.getElementById('quote-container');
+    const div = document.createElement('div');
+    div.className = 'entry-row';
+    div.innerHTML = `
+      <select class="quote-brand">${BRAND_OPTIONS}</select>
+      <span class="hash-symbol">＃</span>
+      <input type="text" class="quote-code" placeholder="篇數編號（如: 8-5）">
+      <button type="button" class="btn-del" onclick="removeEntry(this)" title="刪除">✕</button>
+    `;
+    container.appendChild(div);
+  }
+
   function addSelectAccRow() {
     const container = document.getElementById('select-acc-container');
     const div = document.createElement('div');
@@ -529,7 +567,6 @@
     if (container.querySelectorAll('.entry-row').length > 1) {
       btn.parentElement.remove();
     } else {
-      // 若只剩最後一列，清空內容即可，不刪除該列
       const row = btn.parentElement;
       const select = row.querySelector('select');
       if (select) select.selectedIndex = 0;
@@ -606,7 +643,19 @@
       }
     });
 
-    // 9. 發文帳號挑選 (多筆遍歷)
+    // 9. 開文引用 (多筆遍歷)
+    const quoteRows = document.querySelectorAll('#quote-container .entry-row');
+    quoteRows.forEach(row => {
+      const brand = row.querySelector('.quote-brand').value;
+      const code = row.querySelector('.quote-code').value.trim();
+      if (brand && code) {
+        records.push(`${brand}＃ ${code}開文引用`);
+      } else if (code) {
+        records.push(`${code}開文引用`);
+      }
+    });
+
+    // 10. 發文帳號挑選 (多筆遍歷)
     const selRows = document.querySelectorAll('#select-acc-container .entry-row');
     selRows.forEach(row => {
       const brand = row.querySelector('.select-acc-brand').value;
@@ -618,7 +667,7 @@
       }
     });
 
-    // 10. 自訂其他工作內容 (多筆遍歷)
+    // 11. 自訂其他工作內容 (多筆遍歷)
     const customRows = document.querySelectorAll('#custom-container .custom-work-item');
     customRows.forEach(input => {
       const val = input.value.trim();
